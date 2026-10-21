@@ -4,121 +4,113 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090b10">
-  <title>Laboratoire — NEXUS</title>
+  <meta name="theme-color" content="#101010">
+  <meta name="description" content="Calculateur d'allure de course et temps de passage NEXUS Athletics.">
+  <title>PACE LAB — NEXUS Athletics</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
-
   <header class="site-header" id="header">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">N</span>
-      <span>NEXUS<span class="brand-dot">.</span></span>
-    </a>
-
-    <nav class="nav" aria-label="Navigation principale">
+    <a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXUS<span class="brand-dot">/</span>ATHLETICS</span></a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span></button>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
       <a class="nav-link" href="index.html">Accueil</a>
-      <a class="nav-link" href="systems.html">Systèmes</a>
-      <a class="nav-link active" href="laboratory.html">Laboratoire</a>
-      <a class="nav-link" href="about.html">À propos</a>
+      <a class="nav-link" href="systems.html">Entraînements</a>
+      <a class="nav-link active" href="laboratory.html">Mes allures</a>
+      <a class="nav-link" href="about.html">Le concept</a>
     </nav>
-
-    <a class="header-cta magnetic" href="systems.html">
-      <span>Modules</span><span>↗</span>
-    </a>
-
-    <button class="menu-toggle" id="menu-toggle"
-      aria-label="Ouvrir le menu" aria-expanded="false">
-      <span></span><span></span>
-    </button>
+    <a class="header-cta" href="systems.html">VOIR LES SÉANCES <span>↗</span></a>
   </header>
 
   <main>
-    <section class="hero section-shell" style="min-height:650px">
-      <div class="hero-content">
-        <div class="eyebrow reveal">
-          <span class="status-dot"></span>
-          LAB / MODE EXPÉRIMENTAL
+    <section class="page-hero page-hero-compact">
+      <div class="page-hero-bg"></div>
+      <div class="eyebrow reveal"><span class="live-dot"></span> PERFORMANCE TOOLS / 002</div>
+      <h1 class="reveal">PACE<br><span>LAB.</span></h1>
+      <p class="page-lead reveal">Transforme ton chrono en repères concrets. Des chiffres utiles, pas des promesses.</p>
+      <div class="page-hero-bottom"><span>PACE / SPEED / SPLITS</span><span>02 — 03</span></div>
+    </section>
+
+    <section class="section section-pad">
+      <div class="section-top reveal"><span class="section-index">01 / PACE CALCULATOR</span><span class="section-note">TES DONNÉES, TES REPÈRES</span></div>
+
+      <div class="calculator-layout">
+        <div class="calculator-panel reveal">
+          <span class="panel-label">ENTRÉE DES DONNÉES</span>
+          <h2>TON DERNIER<br><span class="accent">CHRONO.</span></h2>
+          <p class="panel-copy">Saisis une distance et ton temps réalisé pour calculer ton allure moyenne.</p>
+
+          <form id="pace-form">
+            <label for="distance">DISTANCE</label>
+            <select id="distance" name="distance">
+              <option value="1">1 km</option>
+              <option value="3">3 km</option>
+              <option value="5" selected>5 km</option>
+              <option value="10">10 km</option>
+              <option value="21.0975">Semi-marathon</option>
+              <option value="42.195">Marathon</option>
+            </select>
+
+            <label for="hours">CHRONO RÉALISÉ</label>
+            <div class="time-inputs">
+              <div><input id="hours" type="number" min="0" max="99" value="0" inputmode="numeric" aria-label="Heures"><span>HEURES</span></div>
+              <div><input id="minutes" type="number" min="0" max="59" value="24" inputmode="numeric" aria-label="Minutes"><span>MINUTES</span></div>
+              <div><input id="seconds" type="number" min="0" max="59" value="22" inputmode="numeric" aria-label="Secondes"><span>SECONDES</span></div>
+            </div>
+
+            <button class="button button-primary calculator-submit" type="submit">CALCULER MES ALLURES <span>↗</span></button>
+            <p id="form-error" class="form-error" role="alert" aria-live="polite"></p>
+          </form>
         </div>
 
-        <h1 class="hero-title reveal"
-          style="font-size:clamp(60px,8vw,108px)">
-          Ici, on<br><span class="accent-word">teste.</span>
-        </h1>
-
-        <p class="hero-copy reveal">
-          Le laboratoire est un espace pour essayer, observer
-          et apprendre. Chaque prototype commence par une
-          question et accepte l'imprévu.
-        </p>
-
-        <div class="hero-actions reveal">
-          <a class="button button-primary magnetic" href="systems.html">
-            <span>Voir les modules</span>
-            <span class="button-arrow">↗</span>
-          </a>
+        <div class="results-panel reveal" id="results" aria-live="polite">
+          <span class="panel-label">RÉSULTATS / ANALYSE</span>
+          <div class="result-main">
+            <span>ALLURE MOYENNE</span>
+            <strong id="pace-result">04:52</strong>
+            <span class="result-unit">MIN / KM</span>
+          </div>
+          <div class="result-stats">
+            <div><span>DISTANCE</span><strong id="distance-result">5 km</strong></div>
+            <div><span>TEMPS TOTAL</span><strong id="time-result">24:22</strong></div>
+            <div><span>VITESSE MOYENNE</span><strong id="speed-result">12,3 km/h</strong></div>
+          </div>
+          <div class="splits-block">
+            <div class="splits-heading"><span>TEMPS DE PASSAGE</span><span>ALLURE CONSTANTE</span></div>
+            <div id="splits-list" class="splits-list">
+              <div class="split-row"><span>1 KM</span><strong>04:52</strong></div>
+              <div class="split-row"><span>2 KM</span><strong>09:45</strong></div>
+              <div class="split-row"><span>3 KM</span><strong>14:37</strong></div>
+              <div class="split-row"><span>4 KM</span><strong>19:30</strong></div>
+              <div class="split-row"><span>5 KM</span><strong>24:22</strong></div>
+            </div>
+          </div>
+          <p class="disclaimer">Les temps de passage sont calculés à allure moyenne constante. Ils ne prédisent pas ton prochain résultat.</p>
         </div>
-      </div>
-
-      <div class="hero-visual reveal">
-        <div class="orbit orbit-one"></div>
-        <div class="orbit orbit-two"></div>
-        <div class="orbit orbit-three"></div>
-
-        <div class="core">
-          <div class="core-inner">LAB<span>_</span></div>
-        </div>
-
-        <span class="visual-label label-top">
-          EXPERIMENT <b>ACTIVE</b>
-        </span>
-        <span class="visual-label label-bottom">
-          STATUS <b>OBSERVING</b>
-        </span>
       </div>
     </section>
 
-    <section class="section-shell section-pad systems-section">
-      <div class="section-kicker reveal">
-        <span>01 / PROTOCOLE</span>
-        <span>BOUCLE D'EXPLORATION</span>
-      </div>
-
-      <div class="stats-grid">
-        <article class="stat-card reveal">
-          <span class="stat-index">PHASE / 01</span>
-          <strong class="stat-number" data-count="1">0</strong>
-          <span class="stat-label">Formuler une question</span>
-          <span class="stat-line"></span>
-        </article>
-
-        <article class="stat-card reveal">
-          <span class="stat-index">PHASE / 02</span>
-          <strong class="stat-number" data-count="2">0</strong>
-          <span class="stat-label">Construire un prototype</span>
-          <span class="stat-line"></span>
-        </article>
-
-        <article class="stat-card reveal">
-          <span class="stat-index">PHASE / 03</span>
-          <strong class="stat-number" data-count="3">0</strong>
-          <span class="stat-label">Observer et recommencer</span>
-          <span class="stat-line"></span>
-        </article>
+    <section class="weekly-section">
+      <div class="section section-pad">
+        <div class="section-top reveal"><span class="section-index">02 / HOW TO USE IT</span><span class="section-note">COMPRENDRE SON ALLURE</span></div>
+        <div class="intro-grid">
+          <h2 class="section-title reveal">LES CHIFFRES<br><span class="accent">NE FONT PAS TOUT.</span></h2>
+          <div class="mission-copy reveal">
+            <p>Ton allure moyenne est un repère, pas une obligation à chaque entraînement. L'endurance facile doit rester confortable. Les séances rapides doivent être adaptées à ton expérience et à ton état de forme.</p>
+            <a class="text-link" href="systems.html">DÉCOUVRIR LES SÉANCES <span>↗</span></a>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">N</span>
-      <span>NEXUS<span class="brand-dot">.</span></span>
-    </a>
-    <span class="footer-note">CONSTRUIRE CE QUI VIENT.</span>
-    <span class="footer-copy">© 2026 NEXUS LAB</span>
-    <a href="#header" class="back-top">RETOUR EN HAUT ↑</a>
+    <a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXUS<span class="brand-dot">/</span>ATHLETICS</span></a>
+    <span class="footer-note">DISCIPLINE OVER EXCUSES.</span>
+    <span class="footer-copy">© 2026 NEXUS ATHLETICS</span>
+    <a class="back-top" href="#header">RETOUR EN HAUT ↑</a>
   </footer>
 </body>
 </html>
