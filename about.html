@@ -4,103 +4,71 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090b10">
-  <title>À propos — NEXUS</title>
+  <meta name="theme-color" content="#101010">
+  <meta name="description" content="Le concept NEXUS Athletics : discipline, entraînement et progression durable.">
+  <title>Le concept — NEXUS Athletics</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
-
   <header class="site-header" id="header">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">N</span>
-      <span>NEXUS<span class="brand-dot">.</span></span>
-    </a>
-
-    <nav class="nav" aria-label="Navigation principale">
+    <a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXUS<span class="brand-dot">/</span>ATHLETICS</span></a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span></button>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
       <a class="nav-link" href="index.html">Accueil</a>
-      <a class="nav-link" href="systems.html">Systèmes</a>
-      <a class="nav-link" href="laboratory.html">Laboratoire</a>
-      <a class="nav-link active" href="about.html">À propos</a>
+      <a class="nav-link" href="systems.html">Entraînements</a>
+      <a class="nav-link" href="laboratory.html">Mes allures</a>
+      <a class="nav-link active" href="about.html">Le concept</a>
     </nav>
-
-    <a class="header-cta magnetic" href="laboratory.html">
-      <span>Explorer</span><span>↗</span>
-    </a>
-
-    <button class="menu-toggle" id="menu-toggle"
-      aria-label="Ouvrir le menu" aria-expanded="false">
-      <span></span><span></span>
-    </button>
+    <a class="header-cta" href="systems.html">COMMENCER <span>↗</span></a>
   </header>
 
   <main>
-    <section class="section-shell"
-      style="padding-top:175px;padding-bottom:95px">
+    <section class="page-hero">
+      <div class="page-hero-bg"></div>
+      <div class="eyebrow reveal"><span class="live-dot"></span> OUR PHILOSOPHY / 003</div>
+      <h1 class="reveal">EARN<br><span>EVERY STEP.</span></h1>
+      <p class="page-lead reveal">La performance n'est pas un raccourci. C'est un processus qui se construit, séance après séance.</p>
+      <div class="page-hero-bottom"><span>DISCIPLINE / PATIENCE / PROGRESS</span><span>03 — 03</span></div>
+    </section>
 
-      <div class="eyebrow reveal">
-        <span class="status-dot"></span>
-        À PROPOS / NEXUS LAB
-      </div>
-
-      <h1 class="hero-title reveal"
-        style="font-size:clamp(56px,8.5vw,112px)">
-        Construire<br>
-        ce qui <span class="accent-word">vient.</span>
-      </h1>
-
-      <div class="intro-grid">
-        <div></div>
-
-        <div class="intro-text reveal">
-          <p>
-            NEXUS est un concept de laboratoire numérique dédié
-            à l'expérimentation. Son terrain de jeu : les interfaces,
-            les systèmes créatifs et les nouvelles formes d'interaction.
-          </p>
-
-          <p>
-            Notre approche tient en trois mots : rester curieux,
-            prototyper vite, apprendre en continu.
-          </p>
+    <section class="section section-pad">
+      <div class="section-top reveal"><span class="section-index">01 / THE MINDSET</span><span class="section-note">NOTRE APPROCHE</span></div>
+      <div class="manifesto-grid">
+        <span class="manifesto-number reveal">N<span>/</span>A</span>
+        <div class="manifesto-copy reveal">
+          <h2>LA RÉGULARITÉ<br>BAT LE <span class="accent">TOUT OU RIEN.</span></h2>
+          <p>NEXUS Athletics est un concept de site dédié à la course à pied et à l'athlétisme. Son objectif : rendre les entraînements plus lisibles, aider à suivre ses repères et encourager une progression structurée.</p>
+          <p>Une bonne séance n'est pas forcément la plus dure. C'est celle qui correspond à ton objectif, à ton niveau et à ta récupération du moment.</p>
         </div>
       </div>
     </section>
 
-    <section class="manifesto section-shell">
-      <div class="manifesto-mark reveal">N<span>/</span>X</div>
-
-      <div class="manifesto-content reveal">
-        <span class="section-kicker">01 / MANIFESTE</span>
-
-        <h2>
-          La curiosité est<br>
-          notre <span class="accent-word">moteur.</span>
-        </h2>
-
-        <p>
-          Une technologie n'est intéressante que lorsqu'elle ouvre
-          une possibilité. Nous explorons pour découvrir ces
-          possibilités et leur donner une forme.
-        </p>
-
-        <a class="button button-outline magnetic" href="systems.html">
-          <span>Explorer les systèmes</span>
-          <span class="button-arrow">↗</span>
-        </a>
+    <section class="weekly-section">
+      <div class="section section-pad">
+        <div class="section-top reveal"><span class="section-index">02 / FOUR PRINCIPLES</span><span class="section-note">LES BASES</span></div>
+        <div class="principle-grid">
+          <article class="principle-card reveal"><span class="card-number">01</span><span class="card-symbol">↗</span><h3>OBJECTIF CLAIR</h3><p>Savoir ce que tu travailles avant de commencer une séance.</p><span class="card-footer">INTENTION</span></article>
+          <article class="principle-card reveal"><span class="card-number">02</span><span class="card-symbol">⌁</span><h3>CHARGE ADAPTÉE</h3><p>Progresser progressivement plutôt que multiplier les efforts maximaux.</p><span class="card-footer">PROGRESSION</span></article>
+          <article class="principle-card reveal"><span class="card-number">03</span><span class="card-symbol">◷</span><h3>RÉCUPÉRATION</h3><p>Prévoir des jours faciles et du repos pour assimiler le travail.</p><span class="card-footer">ÉQUILIBRE</span></article>
+        </div>
       </div>
+    </section>
+
+    <section class="final-cta">
+      <span class="section-index">03 / YOUR NEXT STEP</span>
+      <h2>MOINS D'EXCUSES.<br><span class="accent">PLUS DE MÉTHODE.</span></h2>
+      <p>Prépare ta prochaine séance et avance à ton rythme.</p>
+      <a class="button button-primary" href="systems.html">VOIR LES ENTRAÎNEMENTS <span>↗</span></a>
     </section>
   </main>
 
   <footer class="site-footer">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">N</span>
-      <span>NEXUS<span class="brand-dot">.</span></span>
-    </a>
-    <span class="footer-note">CONSTRUIRE CE QUI VIENT.</span>
-    <span class="footer-copy">© 2026 NEXUS LAB</span>
-    <a href="#header" class="back-top">RETOUR EN HAUT ↑</a>
+    <a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXUS<span class="brand-dot">/</span>ATHLETICS</span></a>
+    <span class="footer-note">DISCIPLINE OVER EXCUSES.</span>
+    <span class="footer-copy">© 2026 NEXUS ATHLETICS</span>
+    <a class="back-top" href="#header">RETOUR EN HAUT ↑</a>
   </footer>
 </body>
 </html>
