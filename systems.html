@@ -4,138 +4,107 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090b10">
-  <title>Systèmes — NEXUS</title>
+  <meta name="theme-color" content="#101010">
+  <meta name="description" content="Séances de course à pied, endurance, fractionné et athlétisme sur piste.">
+  <title>Entraînements — NEXUS Athletics</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
-
   <header class="site-header" id="header">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">N</span>
-      <span>NEXUS<span class="brand-dot">.</span></span>
-    </a>
-
-    <nav class="nav" aria-label="Navigation principale">
+    <a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXUS<span class="brand-dot">/</span>ATHLETICS</span></a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span></button>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
       <a class="nav-link" href="index.html">Accueil</a>
-      <a class="nav-link active" href="systems.html">Systèmes</a>
-      <a class="nav-link" href="laboratory.html">Laboratoire</a>
-      <a class="nav-link" href="about.html">À propos</a>
+      <a class="nav-link active" href="systems.html">Entraînements</a>
+      <a class="nav-link" href="laboratory.html">Mes allures</a>
+      <a class="nav-link" href="about.html">Le concept</a>
     </nav>
-
-    <a class="header-cta magnetic" href="laboratory.html">
-      <span>Explorer</span><span>↗</span>
-    </a>
-
-    <button class="menu-toggle" id="menu-toggle"
-      aria-label="Ouvrir le menu" aria-expanded="false">
-      <span></span><span></span>
-    </button>
+    <a class="header-cta" href="laboratory.html">CALCULER MON ALLURE <span>↗</span></a>
   </header>
 
   <main>
-    <section class="section-shell"
-      style="padding-top:170px;padding-bottom:70px">
-
-      <div class="eyebrow reveal">
-        <span class="status-dot"></span>
-        INDEX DES MODULES / 001—003
-      </div>
-
-      <h1 class="hero-title reveal"
-        style="font-size:clamp(58px,9vw,110px)">
-        Explorer les<br>
-        <span class="accent-word">systèmes.</span>
-      </h1>
-
-      <p class="hero-copy reveal">
-        Des prototypes conceptuels pour imaginer de nouvelles
-        interactions entre les humains et les technologies.
-      </p>
+    <section class="page-hero">
+      <div class="page-hero-bg"></div>
+      <div class="eyebrow reveal"><span class="live-dot"></span> TRAINING DATABASE / 001</div>
+      <h1 class="reveal">BUILT<br>BY <span>TRAINING.</span></h1>
+      <p class="page-lead reveal">Des séances structurées pour travailler les bonnes qualités au bon moment.</p>
+      <div class="page-hero-bottom"><span>ENDURANCE / SPEED / TRACK</span><span>01 — 03</span></div>
     </section>
 
-    <section class="section-shell section-pad systems-section">
-      <div class="module-grid">
-
-        <article class="module-card module-large reveal">
-          <span class="module-top">
-            <span>MODULE / 001</span>
-            <span class="module-icon">↗</span>
-          </span>
-
-          <div class="module-art art-wave">
-            <span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
+    <section class="section section-pad">
+      <div class="section-top reveal"><span class="section-index">01 / SESSION TYPES</span><span class="section-note">CHOISIS TON OBJECTIF</span></div>
+      <div class="session-list">
+        <article class="session-card reveal" id="endurance">
+          <div class="session-id">01</div>
+          <div class="session-main">
+            <span class="session-category">BASE AÉROBIE</span>
+            <h2>ENDURANCE<br>FONDAMENTALE</h2>
+            <p>Une course facile pendant laquelle tu peux parler en phrases complètes. Garde une allure confortable et termine avec la sensation de pouvoir continuer.</p>
+            <div class="session-details"><span>DURÉE : 25–45 MIN</span><span>INTENSITÉ : FACILE</span></div>
           </div>
-
-          <div class="module-bottom">
-            <div>
-              <h3>Interfaces vivantes</h3>
-              <p>
-                Des interfaces réactives qui donnent une forme
-                au mouvement.
-              </p>
-            </div>
-            <span class="module-tag">INTERACTION</span>
-          </div>
+          <div class="session-side"><span class="session-icon">↗</span><span>BUILD<br>YOUR BASE</span></div>
         </article>
 
-        <article class="module-card reveal">
-          <span class="module-top">
-            <span>MODULE / 002</span>
-            <span class="module-icon">↗</span>
-          </span>
-
-          <div class="module-art art-radar">
-            <div class="radar-ring"></div>
-            <div class="radar-sweep"></div>
-            <span class="radar-point"></span>
+        <article class="session-card reveal" id="fractionne">
+          <div class="session-id">02</div>
+          <div class="session-main">
+            <span class="session-category">TRAVAIL D'ALLURE</span>
+            <h2>FRACTIONNÉ<br>CONTRÔLÉ</h2>
+            <p>Exemple : échauffement progressif, puis 6 répétitions de 1 minute à une allure soutenue mais maîtrisée, avec 2 minutes de récupération facile, et retour au calme.</p>
+            <div class="session-details"><span>RÉPÉTITIONS : 6 × 1 MIN</span><span>RÉCUPÉRATION : 2 MIN</span></div>
           </div>
-
-          <div class="module-bottom">
-            <div>
-              <h3>Signaux émergents</h3>
-              <p>Détecter le signal au milieu du bruit.</p>
-            </div>
-            <span class="module-tag">ANALYSE</span>
-          </div>
+          <div class="session-side"><span class="session-icon">⌁</span><span>CONTROL<br>YOUR PACE</span></div>
         </article>
 
-        <article class="module-card reveal">
-          <span class="module-top">
-            <span>MODULE / 003</span>
-            <span class="module-icon">↗</span>
-          </span>
-
-          <div class="module-art art-cube">
-            <div class="cube">
-              <span></span><span></span><span></span>
-            </div>
+        <article class="session-card reveal" id="piste">
+          <div class="session-id">03</div>
+          <div class="session-main">
+            <span class="session-category">ATHLÉTISME</span>
+            <h2>TRAVAIL<br>SUR PISTE</h2>
+            <p>Exemple de séance technique : 6 × 200 m à allure régulière, avec 200 m de marche ou de trot très lent entre les répétitions. Ne cherche pas le sprint maximal.</p>
+            <div class="session-details"><span>VOLUME RAPIDE : 1 200 M</span><span>PRIORITÉ : RÉGULARITÉ</span></div>
           </div>
-
-          <div class="module-bottom">
-            <div>
-              <h3>Espaces synthétiques</h3>
-              <p>De nouveaux espaces pour expérimenter.</p>
-            </div>
-            <span class="module-tag">IMMERSION</span>
-          </div>
+          <div class="session-side"><span class="session-icon">◎</span><span>OWN<br>THE TRACK</span></div>
         </article>
 
+        <article class="session-card reveal">
+          <div class="session-id">04</div>
+          <div class="session-main">
+            <span class="session-category">RÉCUPÉRATION</span>
+            <h2>RETOUR<br>AU CALME</h2>
+            <p>Après une séance intense, prévois une journée facile ou du repos. La récupération fait partie de l'entraînement, au même titre que les répétitions.</p>
+            <div class="session-details"><span>INTENSITÉ : TRÈS FACILE</span><span>OBJECTIF : ASSIMILER</span></div>
+          </div>
+          <div class="session-side"><span class="session-icon">◷</span><span>RECOVER<br>TO PROGRESS</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="weekly-section">
+      <div class="section section-pad">
+        <div class="section-top reveal"><span class="section-index">02 / EXAMPLE WEEK</span><span class="section-note">RÉGULARITÉ AVANT INTENSITÉ</span></div>
+        <h2 class="section-title reveal">UNE SEMAINE<br><span class="accent">BIEN ÉQUILIBRÉE.</span></h2>
+        <div class="week-grid">
+          <article class="week-card"><span>LUN</span><strong>Repos</strong><p>Récupération</p></article>
+          <article class="week-card"><span>MAR</span><strong>Facile</strong><p>Endurance confortable</p></article>
+          <article class="week-card"><span>MER</span><strong>Repos</strong><p>Mobilité légère</p></article>
+          <article class="week-card"><span>JEU</span><strong>Qualité</strong><p>Fractionné adapté</p></article>
+          <article class="week-card"><span>VEN</span><strong>Repos</strong><p>Sommeil et récupération</p></article>
+          <article class="week-card"><span>SAM</span><strong>Facile</strong><p>Sortie confortable</p></article>
+          <article class="week-card"><span>DIM</span><strong>Au choix</strong><p>Repos ou activité douce</p></article>
+        </div>
+        <p class="disclaimer">Exemple indicatif à adapter à ton expérience, à tes autres activités et à ta récupération. Si tu débutes, commence plus court et augmente progressivement.</p>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">N</span>
-      <span>NEXUS<span class="brand-dot">.</span></span>
-    </a>
-    <span class="footer-note">CONSTRUIRE CE QUI VIENT.</span>
-    <span class="footer-copy">© 2026 NEXUS LAB</span>
-    <a href="#header" class="back-top">RETOUR EN HAUT ↑</a>
+    <a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXUS<span class="brand-dot">/</span>ATHLETICS</span></a>
+    <span class="footer-note">DISCIPLINE OVER EXCUSES.</span>
+    <span class="footer-copy">© 2026 NEXUS ATHLETICS</span>
+    <a class="back-top" href="#header">RETOUR EN HAUT ↑</a>
   </footer>
 </body>
 </html>
