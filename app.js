@@ -1,896 +1,964 @@
-
 (() => {
   "use strict";
 
+  /* =========================================================
+     NEXUS — INTERFACE GÉNÉRALE
+  ========================================================= */
+
+  const root = document.documentElement;
   const reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
 
-  document.documentElement.classList.add("js-ready");
+  root.classList.add("js-ready");
 
-  /* =========================================
-     1. FONCTIONS GÉNÉRALES DE NEXUS
-  ========================================= */
+  // En-tête compact au défilement
+  const header = document.querySelector("#header, .site-header");
 
-  const header = document.querySelector(".site-header");
-  let lastCompact = false;
-
-  const updateHeader = () => {
-    const compact = window.scrollY > 24;
-    if (compact !== lastCompact) {
-      header?.classList.toggle("compact", compact);
-      lastCompact = compact;
-    }
-  };
+  function updateHeader() {
+    if (!header) return;
+    header.classList.toggle("is-scrolled", window.scrollY > 35);
+  }
 
   updateHeader();
   window.addEventListener("scroll", updateHeader, { passive: true });
 
-  const menuToggle = document.querySelector("#menu-toggle");
-  const nav = document.querySelector(".nav");
+  // Menu mobile
+  const menuButton = document.querySelector(".menu-toggle");
+  const navigation = document.querySelector("#nav, .nav");
 
-  menuToggle?.addEventListener("click", () => {
-    const open = nav?.classList.toggle("open") ?? false;
-    menuToggle.setAttribute("aria-expanded", String(open));
-    menuToggle.setAttribute(
-      "aria-label",
-      open ? "Fermer le menu" : "Ouvrir le menu"
-    );
-  });
+  if (menuButton && navigation) {
+    menuButton.setAttribute("aria-expanded", "false");
 
-  nav?.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      nav.classList.remove("open");
-      menuToggle?.setAttribute("aria-expanded", "false");
-      menuToggle?.setAttribute("aria-label", "Ouvrir le menu");
-    });
-  });
+    menuButton.addEventListener("click", () => {
+      const isOpen = navigation.classList.toggle("is-open");
 
-  const revealItems = document.querySelectorAll(".reveal");
-
-  if (reducedMotion || !("IntersectionObserver" in window)) {
-    revealItems.forEach(item => item.classList.add("is-visible"));
-  } else {
-    revealItems.forEach((item, index) => {
-      if (index % 4 === 1) item.dataset.delay = "1";
-      if (index % 4 === 2) item.dataset.delay = "2";
-      if (index % 4 === 3) item.dataset.delay = "3";
+      menuButton.classList.toggle("is-active", isOpen);
+      menuButton.setAttribute("aria-expanded", String(isOpen));
+      document.body.classList.toggle("menu-open", isOpen);
     });
 
-    const revealObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          revealObserver.unobserve(entry.target);
-        }
+    navigation.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        navigation.classList.remove("is-open");
+        menuButton.classList.remove("is-active");
+        menuButton.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -35px 0px" });
+    });
 
-    revealItems.forEach(item => revealObserver.observe(item));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        navigation.classList.remove("is-open");
+        menuButton.classList.remove("is-active");
+        menuButton.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("menu-open");
+      }
+    });
   }
 
+  // Animations d'apparition au défilement
+  const revealElements = document.querySelectorAll(
+    ".reveal, .section, .mission-grid, .principle-card, " +
+    ".feature-content, .training-card, .tile"
+  );
+
+  if (!reducedMotion && "IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -35px 0px" }
+    );
+
+    revealElements.forEach((element) => {
+      element.classList.add("reveal-ready");
+      revealObserver.observe(element);
+    });
+  } else {
+    revealElements.forEach((element) => {
+      element.classList.add("is-visible");
+    });
+  }
+
+  // Compteurs animés
   const counters = document.querySelectorAll("[data-count]");
 
-  const animateCount = element => {
+  function animateCounter(element) {
     const target = Number(element.dataset.count);
-    const suffix = element.dataset.suffix || "";
+
+    if (!Number.isFinite(target)) return;
 
     if (reducedMotion) {
-      element.textContent =
-        target.toLocaleString("fr-FR") + suffix;
+      element.textContent = String(target);
       return;
     }
 
-    const duration = 1050;
-    const start = performance.now();
+    const duration = 1100;
+    const startTime = performance.now();
 
-    const tick = now => {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 4);
+    function tick(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
 
-      element.textContent =
-        Math.round(target * eased).toLocaleString("fr-FR") + suffix;
+      element.textContent = Math.round(target * eased).toLocaleString("fr-FR");
 
       if (progress < 1) requestAnimationFrame(tick);
-    };
+    }
 
     requestAnimationFrame(tick);
-  };
+  }
 
-  if ("IntersectionObserver" in window && !reducedMotion) {
-    const countObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateCount(entry.target);
-          entry.target.closest(".stat-card")?.classList.add("is-visible");
-          countObserver.unobserve(entry.target);
-        }
+  if ("IntersectionObserver" in window) {
+    const counterObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
       });
-    }, { threshold: 0.55 });
+    });
 
-    counters.forEach(counter => countObserver.observe(counter));
+    counters.forEach((counter) => counterObserver.observe(counter));
   } else {
-    counters.forEach(counter => {
-      animateCount(counter);
-      counter.closest(".stat-card")?.classList.add("is-visible");
-    });
+    counters.forEach(animateCounter);
   }
 
-  const finePointer = window.matchMedia(
-    "(hover: hover) and (pointer: fine)"
-  ).matches;
+  // Effet magnétique léger sur les boutons
+  if (!reducedMotion && window.matchMedia("(pointer: fine)").matches) {
+    document.querySelectorAll(".magnetic, .button-magnetic").forEach((item) => {
+      item.addEventListener("pointermove", (event) => {
+        const rect = item.getBoundingClientRect();
+        const x = event.clientX - rect.left - rect.width / 2;
+        const y = event.clientY - rect.top - rect.height / 2;
 
-  if (!reducedMotion && finePointer) {
-    document.querySelectorAll(".magnetic").forEach(button => {
-      let frame = 0;
-      let x = 0;
-      let y = 0;
-
-      const render = () => {
-        button.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        frame = 0;
-      };
-
-      button.addEventListener("pointermove", event => {
-        const rect = button.getBoundingClientRect();
-        x = (event.clientX - rect.left - rect.width / 2) * 0.12;
-        y = (event.clientY - rect.top - rect.height / 2) * 0.16;
-
-        if (!frame) frame = requestAnimationFrame(render);
+        item.style.transform =
+          `translate(${x * 0.045}px, ${y * 0.045}px)`;
       });
 
-      button.addEventListener("pointerleave", () => {
-        if (frame) cancelAnimationFrame(frame);
-        frame = 0;
-        button.style.transform = "translate3d(0, 0, 0)";
+      item.addEventListener("pointerleave", () => {
+        item.style.transform = "";
       });
     });
   }
 
-  /* =========================================
-     2. LABORATOIRE DE COURSE À PIED
-  ========================================= */
+  /* =========================================================
+     LABORATOIRE DE COURSE À PIED
+  ========================================================= */
 
   const lab = document.querySelector("#lab-app");
-
-  // Sur les autres pages, seul le code général ci-dessus s'exécute.
   if (!lab) return;
 
-  const $ = selector => lab.querySelector(selector);
+  const $ = (selector) => lab.querySelector(selector);
 
-  const STORAGE_KEY = "nexus-running-history-v1";
+  const elements = {
+    targetPace: $("#target-pace"),
+    customReps: $("#custom-reps"),
+    customEffort: $("#custom-effort"),
+    customRecovery: $("#custom-recovery"),
+    prepare: $("#prepare-workout"),
+    error: $("#config-error"),
+    description: $("#workout-description"),
 
-  const workoutCards = [...lab.querySelectorAll("[data-workout]")];
+    clock: $("#timer-clock"),
+    phase: $("#timer-phase"),
+    subtitle: $("#timer-subtitle"),
+    progress: $("#timer-progress"),
+    status: $("#timer-status"),
+    step: $("#timer-step"),
+    elapsed: $("#timer-elapsed"),
+    total: $("#timer-total"),
 
-  const paceInput = $("#target-pace");
-  const repsInput = $("#custom-reps");
-  const effortInput = $("#custom-effort");
-  const recoveryInput = $("#custom-recovery");
+    start: $("#timer-start"),
+    pause: $("#timer-pause"),
+    next: $("#timer-next"),
+    reset: $("#timer-reset"),
+    notice: $("#timer-notice"),
 
-  const prepareButton = $("#prepare-workout");
-  const configError = $("#config-error");
-  const workoutDescription = $("#workout-description");
+    planTitle: $("#plan-title"),
+    planSummary: $("#plan-summary"),
+    planCount: $("#plan-count"),
+    planList: $("#timer-plan-list"),
 
-  const clock = $("#timer-clock");
-  const phaseLabel = $("#timer-phase");
-  const subtitle = $("#timer-subtitle");
-  const progressBar = $("#timer-progress");
-  const statusLabel = $("#timer-status");
-  const stepLabel = $("#timer-step");
-  const elapsedLabel = $("#timer-elapsed");
-  const totalLabel = $("#timer-total");
-
-  const startButton = $("#timer-start");
-  const pauseButton = $("#timer-pause");
-  const nextButton = $("#timer-next");
-  const resetButton = $("#timer-reset");
-  const timerNotice = $("#timer-notice");
-
-  const planTitle = $("#plan-title");
-  const planSummary = $("#plan-summary");
-  const planCount = $("#plan-count");
-  const planList = $("#timer-plan-list");
-
-  const historyList = $("#history-list");
-  const historyCount = $("#history-count");
-  const historyDuration = $("#history-duration");
-  const historyClear = $("#history-clear");
-  const historyNotice = $("#history-notice");
-
-  const workoutInfo = {
-    vma: {
-      title: "VMA — 30/30",
-      description:
-        "2 séries de 8 répétitions : 30 secondes d'effort et 30 secondes de récupération.",
-      summary: "16 efforts courts, répartis en 2 séries."
-    },
-    fractionne: {
-      title: "Fractionné — 400 m",
-      description:
-        "6 répétitions de 400 m, avec récupération entre les répétitions.",
-      summary: "6 × 400 m. Les temps sont estimés avec l'allure saisie."
-    },
-    pyramide: {
-      title: "Pyramide — 200 à 1 000 m",
-      description:
-        "200, 400, 600, 800, 1 000, 800, 600, 400 puis 200 m.",
-      summary: "9 répétitions avec des distances progressives."
-    },
-    endurance: {
-      title: "Endurance — 30 min",
-      description:
-        "5 minutes d'échauffement, 30 minutes d'endurance, puis 5 minutes de retour au calme.",
-      summary: "Une sortie continue de 30 minutes au milieu de la séance."
-    },
-    custom: {
-      title: "Séance personnalisée",
-      description: "Compose tes répétitions et tes récupérations.",
-      summary: "Séance construite avec tes paramètres."
-    }
+    historyList: $("#history-list"),
+    historyCount: $("#history-count"),
+    historyDuration: $("#history-duration"),
+    historyClear: $("#history-clear"),
+    historyNotice: $("#history-notice")
   };
 
-  let selectedWorkout = "vma";
-  let activeWorkout = null;
+  const HISTORY_KEY = "nexus-running-history-v1";
+  const MAX_HISTORY = 100;
+
+  const workoutNames = {
+    vma: "VMA 30/30",
+    fractionne: "Fractionné 400 m",
+    pyramide: "Pyramide",
+    endurance: "Endurance",
+    custom: "Séance personnalisée"
+  };
+
   let segments = [];
   let currentIndex = 0;
-  let elapsedInSegment = 0;
-  let segmentStartedAt = 0;
-  let totalElapsedBeforePause = 0;
-  let sessionStartedAt = 0;
-  let timerInterval = null;
-  let isRunning = false;
-  let isFinished = false;
+  let remaining = 0;
+  let running = false;
+  let finished = false;
+  let intervalId = null;
+  let endTimestamp = null;
+  let segmentStartedAt = null;
+  let elapsedBeforeSegment = 0;
+  let completedSeconds = 0;
+  let sessionStartedAt = null;
+  let workoutType = "";
+  let sessionSaved = false;
 
-  /* ---------- Utilitaires ---------- */
+  const now = () => Date.now();
 
-  const clamp = (value, min, max) =>
-    Math.min(max, Math.max(min, value));
+  function formatTime(totalSeconds) {
+    const seconds = Math.max(0, Math.ceil(totalSeconds));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const rest = seconds % 60;
 
-  const formatTime = seconds => {
-    const safeSeconds = Math.max(0, Math.ceil(seconds));
-    const minutes = Math.floor(safeSeconds / 60);
-    const remainder = safeSeconds % 60;
+    if (hours > 0) {
+      return [hours, minutes, rest]
+        .map((value) => String(value).padStart(2, "0"))
+        .join(":");
+    }
 
-    return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
-  };
+    return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+  }
 
-  const formatLongTime = seconds => {
+  function formatDuration(totalSeconds) {
+    const seconds = Math.max(0, Math.round(totalSeconds));
     const minutes = Math.floor(seconds / 60);
-    const remainder = seconds % 60;
+    const rest = seconds % 60;
 
-    if (minutes === 0) return `${remainder} s`;
-    if (remainder === 0) return `${minutes} min`;
-    return `${minutes} min ${remainder} s`;
-  };
+    if (minutes === 0) return `${rest} s`;
+    if (rest === 0) return `${minutes} min`;
+    return `${minutes} min ${rest} s`;
+  }
 
-  const formatDistance = meters =>
-    meters >= 1000
-      ? `${(meters / 1000).toLocaleString("fr-FR")} km`
-      : `${meters} m`;
+  function formatDistance(meters) {
+    if (meters >= 1000) {
+      return `${(meters / 1000).toLocaleString("fr-FR")} km`;
+    }
+    return `${meters} m`;
+  }
 
-  const readPace = () => {
-    const value = paceInput.value.trim().replace(",", ".");
+  function setText(element, value) {
+    if (element) element.textContent = value;
+  }
+
+  function showNotice(message, type = "info") {
+    if (!elements.notice) return;
+    elements.notice.textContent = message;
+    elements.notice.dataset.type = type;
+    elements.notice.hidden = !message;
+  }
+
+  function showError(message) {
+    if (!elements.error) return;
+    elements.error.textContent = message;
+    elements.error.hidden = !message;
+  }
+
+  function clearIntervalTimer() {
+    if (intervalId !== null) {
+      window.clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  function setButtonStates() {
+    if (elements.start) {
+      elements.start.disabled = running || finished || segments.length === 0;
+    }
+
+    if (elements.pause) {
+      elements.pause.disabled = !running;
+    }
+
+    if (elements.next) {
+      elements.next.disabled = segments.length === 0 || finished;
+    }
+
+    if (elements.reset) {
+      elements.reset.disabled = segments.length === 0;
+    }
+  }
+
+  function readPace() {
+    const value = elements.targetPace?.value?.trim() ?? "";
     const match = value.match(/^(\d{1,2}):([0-5]?\d)$/);
 
-    if (!match) return null;
+    if (!match) {
+      throw new Error("Indique une allure au format minutes:secondes, par exemple 4:35.");
+    }
 
     const minutes = Number(match[1]);
     const seconds = Number(match[2]);
+    const total = minutes * 60 + seconds;
 
-    if (minutes < 2 || minutes > 20) return null;
+    if (total < 120 || total > 1200) {
+      throw new Error("L’allure doit être comprise entre 2:00 et 20:00 min/km.");
+    }
 
-    return minutes * 60 + seconds;
-  };
+    return total;
+  }
 
-  const paceForDistance = meters => {
-    const paceSeconds = readPace();
-    return Math.max(1, Math.round((paceSeconds * meters) / 1000));
-  };
+  function paceForDistance(distance, paceSeconds) {
+    return Math.round(distance / 1000 * paceSeconds);
+  }
 
-  const makeSegment = (label, kind, seconds, detail = "") => ({
-    label,
-    kind,
-    duration: Math.max(1, Math.round(seconds)),
-    detail
-  });
+  function makeSegment(name, duration, type = "effort", extra = {}) {
+    return {
+      name,
+      duration: Math.max(1, Math.round(duration)),
+      type,
+      ...extra
+    };
+  }
 
-  const addWarmup = list => {
-    list.push(makeSegment(
-      "Échauffement",
-      "warmup",
-      300,
-      "5 minutes faciles avant le travail principal."
-    ));
-  };
+  function addWarmup(list, minutes = 10) {
+    list.push(makeSegment("Échauffement", minutes * 60, "warmup"));
+  }
 
-  const addCooldown = list => {
-    list.push(makeSegment(
-      "Retour au calme",
-      "cooldown",
-      300,
-      "5 minutes faciles pour terminer la séance."
-    ));
-  };
+  function addCooldown(list, minutes = 5) {
+    list.push(makeSegment("Retour au calme", minutes * 60, "cooldown"));
+  }
 
-  /* ---------- Construction des séances ---------- */
-
-  const buildWorkout = type => {
+  function buildWorkout(type) {
     const list = [];
-    const info = workoutInfo[type];
+    const pace = elements.targetPace?.value?.trim()
+      ? readPace()
+      : null;
 
     if (type === "vma") {
-      addWarmup(list);
+      addWarmup(list, 10);
 
-      for (let rep = 1; rep <= 16; rep++) {
+      for (let i = 1; i <= 16; i++) {
         list.push(makeSegment(
-          `Effort ${rep}/16`,
-          "effort",
+          `Répétition ${i}/16 — rapide`,
           30,
-          "30 secondes d'effort rapide, sans sprint maximal."
+          "effort",
+          { rep: i, reps: 16 }
         ));
 
-        if (rep < 16) {
-          const betweenSeries = rep === 8;
+        if (i < 16) {
+          const recovery = i === 8 ? 120 : 30;
           list.push(makeSegment(
-            betweenSeries ? "Récupération entre séries" : `Récupération ${rep}/16`,
-            "recovery",
-            betweenSeries ? 120 : 30,
-            betweenSeries
-              ? "2 minutes avant la deuxième série."
-              : "Trottiner ou marcher selon ton niveau."
+            i === 8 ? "Récupération longue" : "Récupération",
+            recovery,
+            "recovery"
           ));
         }
       }
 
-      addCooldown();
+      addCooldown(list, 5);
+      return list;
     }
 
     if (type === "fractionne") {
-      addWarmup(list);
+      if (!pace) {
+        throw new Error("Renseigne ton allure cible pour calculer les temps des 400 m.");
+      }
 
-      const effortSeconds = paceForDistance(400);
+      addWarmup(list, 10);
 
-      for (let rep = 1; rep <= 6; rep++) {
+      for (let i = 1; i <= 6; i++) {
         list.push(makeSegment(
-          `Effort ${rep}/6 — 400 m`,
+          `400 m — répétition ${i}/6`,
+          paceForDistance(400, pace),
           "effort",
-          effortSeconds,
-          `Temps théorique à l'allure ${paceInput.value.trim()} min/km.`
+          { distance: 400, rep: i, reps: 6 }
         ));
 
-        if (rep < 6) {
-          list.push(makeSegment(
-            `Récupération ${rep}/5`,
-            "recovery",
-            90,
-            "90 secondes de récupération."
-          ));
+        if (i < 6) {
+          list.push(makeSegment("Récupération", 90, "recovery"));
         }
       }
 
-      addCooldown();
+      addCooldown(list, 5);
+      return list;
     }
 
     if (type === "pyramide") {
-      addWarmup(list);
+      if (!pace) {
+        throw new Error("Renseigne ton allure cible pour calculer les temps de la pyramide.");
+      }
+
+      addWarmup(list, 10);
 
       const distances = [200, 400, 600, 800, 1000, 800, 600, 400, 200];
 
       distances.forEach((distance, index) => {
-        const rep = index + 1;
-
         list.push(makeSegment(
-          `Effort ${rep}/9 — ${formatDistance(distance)}`,
+          `${formatDistance(distance)} — ${index + 1}/${distances.length}`,
+          paceForDistance(distance, pace),
           "effort",
-          paceForDistance(distance),
-          `Temps estimé à l'allure ${paceInput.value.trim()} min/km.`
+          { distance, rep: index + 1, reps: distances.length }
         ));
 
-        if (rep < distances.length) {
-          list.push(makeSegment(
-            `Récupération ${rep}/8`,
-            "recovery",
-            75,
-            "75 secondes de récupération entre les répétitions."
-          ));
+        if (index < distances.length - 1) {
+          list.push(makeSegment("Récupération", 75, "recovery"));
         }
       });
 
-      addCooldown();
+      addCooldown(list, 5);
+      return list;
     }
 
     if (type === "endurance") {
-      addWarmup(list);
-      list.push(makeSegment(
-        "Endurance continue",
-        "effort",
-        30 * 60,
-        "30 minutes à une intensité confortable, où tu peux parler."
-      ));
-      addCooldown(list);
+      list.push(makeSegment("Mise en route", 5 * 60, "warmup"));
+      list.push(makeSegment("Endurance confortable", 30 * 60, "effort"));
+      addCooldown(list, 5);
+      return list;
     }
 
     if (type === "custom") {
-      const reps = Number(repsInput.value);
-      const effort = Number(effortInput.value);
-      const recovery = Number(recoveryInput.value);
+      const reps = Number(elements.customReps?.value);
+      const effort = Number(elements.customEffort?.value);
+      const recovery = Number(elements.customRecovery?.value);
 
       if (!Number.isInteger(reps) || reps < 1 || reps > 30) {
-        throw new Error("Choisis entre 1 et 30 répétitions.");
+        throw new Error("Le nombre de répétitions doit être compris entre 1 et 30.");
       }
 
-      if (!Number.isInteger(effort) || effort < 5 || effort > 3600) {
-        throw new Error("L'effort doit durer entre 5 et 3 600 secondes.");
+      if (!Number.isFinite(effort) || effort < 5 || effort > 3600) {
+        throw new Error("L’effort doit durer entre 5 secondes et 60 minutes.");
       }
 
-      if (!Number.isInteger(recovery) || recovery < 0 || recovery > 1800) {
-        throw new Error("La récupération doit durer entre 0 et 1 800 secondes.");
+      if (!Number.isFinite(recovery) || recovery < 0 || recovery > 1800) {
+        throw new Error("La récupération doit être comprise entre 0 et 30 minutes.");
       }
 
-      addWarmup(list);
+      addWarmup(list, 10);
 
-      for (let rep = 1; rep <= reps; rep++) {
+      for (let i = 1; i <= reps; i++) {
         list.push(makeSegment(
-          `Effort ${rep}/${reps}`,
-          "effort",
+          `Effort ${i}/${reps}`,
           effort,
-          `Effort personnalisé de ${formatLongTime(effort)}.`
+          "effort",
+          { rep: i, reps }
         ));
 
-        if (rep < reps && recovery > 0) {
-          list.push(makeSegment(
-            `Récupération ${rep}/${reps - 1}`,
-            "recovery",
-            recovery,
-            `Récupération de ${formatLongTime(recovery)}.`
-          ));
+        if (i < reps && recovery > 0) {
+          list.push(makeSegment("Récupération", recovery, "recovery"));
         }
       }
 
-      addCooldown(list);
+      addCooldown(list, 5);
+      return list;
     }
 
-    return {
-      id: type,
-      title: info.title,
-      summary: info.summary,
-      segments: list
-    };
-  };
+    throw new Error("Choisis une séance avant de la préparer.");
+  }
 
-  const getTotalDuration = () =>
-    segments.reduce((sum, segment) => sum + segment.duration, 0);
-
-  /* ---------- Affichage du plan ---------- */
-
-  const renderPlan = () => {
-    planTitle.textContent = activeWorkout.title;
-    planSummary.textContent = activeWorkout.summary;
-    planCount.textContent =
-      `${String(segments.length).padStart(2, "0")} ÉTAPES`;
-
-    planList.replaceChildren();
-
-    segments.forEach((segment, index) => {
-      const row = document.createElement("div");
-      row.className = "plan-row";
-      row.dataset.index = String(index);
-
-      const number = document.createElement("span");
-      number.className = "plan-row-number";
-      number.textContent = String(index + 1).padStart(2, "0");
-
-      const text = document.createElement("span");
-      text.className = "plan-row-text";
-      text.textContent = segment.label;
-
-      const time = document.createElement("strong");
-      time.className = "plan-row-time";
-      time.textContent = formatTime(segment.duration);
-
-      row.append(number, text, time);
-      planList.append(row);
-    });
-  };
-
-  const renderSegment = () => {
-    if (!segments.length || !segments[currentIndex]) return;
-
-    const segment = segments[currentIndex];
-    phaseLabel.textContent = segment.label.toUpperCase();
-    subtitle.textContent = segment.detail;
-    clock.textContent = formatTime(segment.duration);
-    stepLabel.textContent = `${currentIndex + 1} / ${segments.length}`;
-
-    planList.querySelectorAll(".plan-row").forEach((row, index) => {
-      row.classList.toggle("is-current", index === currentIndex);
-      row.classList.toggle("is-done", index < currentIndex);
-    });
-
-    const colors = {
-      warmup: "ÉCHAUFFEMENT",
-      effort: "EFFORT",
-      recovery: "RÉCUPÉRATION",
-      cooldown: "RETOUR AU CALME"
-    };
-
-    statusLabel.textContent = isFinished
-      ? "TERMINÉE"
-      : isRunning
-        ? "EN COURS"
-        : "EN ATTENTE";
-
-    timerNotice.textContent = isFinished
-      ? "Séance terminée. Tu peux préparer une nouvelle séance."
-      : isRunning
-        ? "Reste concentré sur l'étape en cours."
-        : "Chronomètre en pause ou en attente.";
-
-    const type = colors[segment.kind] || "SÉANCE";
-    phaseLabel.dataset.kind = segment.kind;
-    phaseLabel.setAttribute("aria-label", type);
-
-    progressBar.style.width = "0%";
-  };
-
-  const updateTimerDisplay = () => {
-    if (!segments.length || isFinished) return;
-
-    const segment = segments[currentIndex];
-    const currentElapsed = elapsedInSegment +
-      (isRunning ? (Date.now() - segmentStartedAt) / 1000 : 0);
-
-    const remaining = Math.max(0, segment.duration - currentElapsed);
-    clock.textContent = formatTime(remaining);
-
-    const completedBefore = segments
-      .slice(0, currentIndex)
-      .reduce((sum, item) => sum + item.duration, 0);
-
-    const totalElapsed = completedBefore + currentElapsed;
-    elapsedLabel.textContent = formatTime(totalElapsed);
-    progressBar.style.width =
-      `${Math.min(100, (totalElapsed / getTotalDuration()) * 100)}%`;
-  };
-
-  /* ---------- Historique local ---------- */
-
-  const readHistory = () => {
-    try {
-      const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      return Array.isArray(value) ? value : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const saveHistory = history => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-      return true;
-    } catch {
-      historyNotice.textContent =
-        "Impossible de sauvegarder : le stockage du navigateur est indisponible.";
-      return false;
-    }
-  };
-
-  const renderHistory = () => {
-    const history = readHistory();
-
-    historyCount.textContent = String(history.length);
-
-    const totalSeconds = history.reduce(
-      (sum, item) => sum + (Number(item.duration) || 0),
-      0
+  function getSelectedWorkout() {
+    const selected = lab.querySelector(
+      "[data-workout].is-selected, [data-workout][aria-pressed='true']"
     );
 
-    historyDuration.textContent =
-      `${Math.round(totalSeconds / 60)} min`;
+    return selected?.dataset.workout ?? "";
+  }
 
-    historyList.replaceChildren();
+  function totalDuration() {
+    return segments.reduce((sum, segment) => sum + segment.duration, 0);
+  }
 
-    if (!history.length) {
-      const empty = document.createElement("p");
-      empty.className = "history-empty";
-      empty.textContent = "Aucune séance terminée pour le moment.";
-      historyList.append(empty);
-      return;
+  function elapsedDuration() {
+    let total = completedSeconds;
+
+    if (running && segmentStartedAt !== null) {
+      total += Math.max(0, (now() - segmentStartedAt) / 1000);
     }
 
-    history.forEach(item => {
-      const row = document.createElement("article");
-      row.className = "history-row";
+    return Math.min(total, totalDuration());
+  }
 
-      const info = document.createElement("div");
-      info.className = "history-row-info";
+  function renderPlan() {
+    if (elements.planList) {
+      elements.planList.replaceChildren();
 
-      const title = document.createElement("strong");
-      title.textContent = item.title;
+      segments.forEach((segment, index) => {
+        const item = document.createElement("li");
+        item.className = "timer-plan-item";
+        if (index === currentIndex) item.classList.add("is-current");
+        if (index < currentIndex) item.classList.add("is-complete");
 
-      const date = document.createElement("span");
-      const parsedDate = new Date(item.date);
-      date.textContent = Number.isNaN(parsedDate.getTime())
-        ? "Date inconnue"
-        : parsedDate.toLocaleString("fr-FR", {
-            dateStyle: "medium",
-            timeStyle: "short"
-          });
+        const name = document.createElement("span");
+        name.className = "timer-plan-name";
+        name.textContent = segment.name;
 
-      info.append(title, date);
+        const duration = document.createElement("span");
+        duration.className = "timer-plan-duration";
+        duration.textContent = formatDuration(segment.duration);
 
-      const duration = document.createElement("div");
-      duration.className = "history-row-duration";
-      duration.textContent = formatLongTime(Number(item.duration) || 0);
-
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "history-delete";
-      remove.textContent = "Supprimer";
-      remove.setAttribute("aria-label", `Supprimer ${item.title}`);
-      remove.addEventListener("click", () => {
-        const updated = readHistory().filter(entry => entry.id !== item.id);
-        saveHistory(updated);
-        renderHistory();
-        historyNotice.textContent = "Séance supprimée de l'historique.";
+        item.append(name, duration);
+        elements.planList.append(item);
       });
-
-      row.append(info, duration, remove);
-      historyList.append(row);
-    });
-  };
-
-  const saveCompletedWorkout = () => {
-    const item = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      title: activeWorkout.title,
-      date: new Date().toISOString(),
-      duration: getTotalDuration()
-    };
-
-    const history = readHistory();
-    history.unshift(item);
-
-    // On garde les 100 séances les plus récentes.
-    const saved = saveHistory(history.slice(0, 100));
-
-    if (saved) {
-      renderHistory();
-      historyNotice.textContent = "Séance enregistrée dans ton historique.";
-    }
-  };
-
-  /* ---------- Contrôle du chronomètre ---------- */
-
-  const stopInterval = () => {
-    if (timerInterval !== null) {
-      window.clearInterval(timerInterval);
-      timerInterval = null;
-    }
-  };
-
-  const startTimer = () => {
-    if (!segments.length) {
-      timerNotice.textContent =
-        "Prépare d'abord une séance avant de démarrer.";
-      return;
     }
 
-    if (isFinished) {
-      timerNotice.textContent =
-        "Cette séance est terminée. Réinitialise-la pour la refaire.";
-      return;
+    setText(elements.planCount, String(segments.length));
+    setText(elements.planTitle, workoutNames[workoutType] || "Séance");
+    setText(
+      elements.planSummary,
+      `${segments.length} étapes · ${formatDuration(totalDuration())}`
+    );
+  }
+
+  function renderSegment() {
+    const segment = segments[currentIndex];
+    if (!segment) return;
+
+    remaining = segment.duration;
+
+    setText(elements.phase, segment.name);
+    setText(elements.subtitle, segment.type === "recovery"
+      ? "Récupère et prépare la suite."
+      : segment.type === "warmup"
+        ? "Monte progressivement en intensité."
+        : segment.type === "cooldown"
+          ? "Relâche l’effort et retrouve ton calme."
+          : "Reste régulier et maîtrise ton effort."
+    );
+
+    setText(elements.clock, formatTime(remaining));
+    setText(elements.step, `${currentIndex + 1} / ${segments.length}`);
+
+    if (elements.status) {
+      elements.status.textContent = running
+        ? "EN COURS"
+        : finished
+          ? "TERMINÉE"
+          : "EN PAUSE";
     }
 
-    if (isRunning) return;
+    if (elements.progress) {
+      elements.progress.style.width = "0%";
+      elements.progress.setAttribute("aria-valuenow", "0");
+    }
 
-    isRunning = true;
-    segmentStartedAt = Date.now();
-    sessionStartedAt = sessionStartedAt || Date.now();
+    renderPlan();
+    setButtonStates();
+  }
 
-    startButton.disabled = true;
-    pauseButton.disabled = false;
-    nextButton.disabled = false;
+  function updateDisplay() {
+    const segment = segments[currentIndex];
 
-    statusLabel.textContent = "EN COURS";
-    timerNotice.textContent = "Séance en cours.";
+    if (segment) {
+      const liveRemaining = running && endTimestamp !== null
+        ? Math.max(0, (endTimestamp - now()) / 1000)
+        : remaining;
 
-    timerInterval = window.setInterval(() => {
-      const current = segments[currentIndex];
-      const elapsed = elapsedInSegment +
-        (Date.now() - segmentStartedAt) / 1000;
+      remaining = Math.max(0, liveRemaining);
+      setText(elements.clock, formatTime(remaining));
 
-      if (elapsed >= current.duration) {
-        advanceSegment();
-        return;
+      const segmentProgress = segment.duration > 0
+        ? ((segment.duration - remaining) / segment.duration) * 100
+        : 100;
+
+      if (elements.progress) {
+        elements.progress.style.width = `${Math.min(100, Math.max(0, segmentProgress))}%`;
+        elements.progress.setAttribute(
+          "aria-valuenow",
+          String(Math.round(segmentProgress))
+        );
       }
+    }
 
-      updateTimerDisplay();
-    }, 200);
+    const total = totalDuration();
+    const elapsed = elapsedDuration();
 
-    updateTimerDisplay();
-  };
+    setText(elements.elapsed, formatDuration(elapsed));
+    setText(elements.total, formatDuration(total));
 
-  const pauseTimer = () => {
-    if (!isRunning) return;
+    if (elements.status) {
+      elements.status.textContent = finished
+        ? "TERMINÉE"
+        : running
+          ? "EN COURS"
+          : "EN PAUSE";
+    }
 
-    elapsedInSegment += (Date.now() - segmentStartedAt) / 1000;
-    isRunning = false;
-    stopInterval();
+    setButtonStates();
+  }
 
-    startButton.disabled = false;
-    pauseButton.disabled = true;
+  function startTimer() {
+    if (!segments.length || running || finished) return;
 
-    statusLabel.textContent = "EN PAUSE";
-    timerNotice.textContent = "Chronomètre en pause.";
-    updateTimerDisplay();
-  };
+    running = true;
+    segmentStartedAt = now();
+    endTimestamp = segmentStartedAt + remaining * 1000;
+    sessionStartedAt ??= segmentStartedAt;
 
-  const advanceSegment = () => {
-    if (!segments.length || isFinished) return;
+    clearIntervalTimer();
+    intervalId = window.setInterval(tick, 200);
 
-    currentIndex += 1;
-    elapsedInSegment = 0;
-    segmentStartedAt = Date.now();
+    showNotice("Chronomètre lancé. Bonne séance !", "success");
+    updateDisplay();
+  }
 
-    if (currentIndex >= segments.length) {
+  function pauseTimer() {
+    if (!running) return;
+
+    remaining = Math.max(0, (endTimestamp - now()) / 1000);
+    completedSeconds += Math.max(0, (now() - segmentStartedAt) / 1000);
+    running = false;
+    segmentStartedAt = null;
+    endTimestamp = null;
+
+    clearIntervalTimer();
+    showNotice("Séance en pause. Tu peux reprendre quand tu veux.");
+    updateDisplay();
+  }
+
+  function tick() {
+    if (!running || endTimestamp === null) return;
+
+    remaining = Math.max(0, (endTimestamp - now()) / 1000);
+
+    if (remaining <= 0) {
+      completedSeconds += Math.max(
+        0,
+        (now() - segmentStartedAt) / 1000
+      );
+
+      running = false;
+      segmentStartedAt = null;
+      endTimestamp = null;
+      clearIntervalTimer();
+
+      advanceSegment(true);
+      return;
+    }
+
+    updateDisplay();
+  }
+
+  function advanceSegment(fromTimer = false) {
+    if (!segments.length || finished) return;
+
+    if (running) {
+      completedSeconds += Math.max(
+        0,
+        (now() - segmentStartedAt) / 1000
+      );
+    }
+
+    running = false;
+    segmentStartedAt = null;
+    endTimestamp = null;
+    clearIntervalTimer();
+
+    if (currentIndex >= segments.length - 1) {
       finishWorkout();
       return;
     }
 
+    currentIndex++;
+    remaining = segments[currentIndex].duration;
+
     renderSegment();
-    updateTimerDisplay();
-  };
+    updateDisplay();
 
-  const finishWorkout = () => {
-    stopInterval();
-    isRunning = false;
-    isFinished = true;
+    if (fromTimer) {
+      showNotice(
+        `Étape terminée. Prochaine étape : ${segments[currentIndex].name}.`,
+        "success"
+      );
+    } else {
+      showNotice(`Étape suivante : ${segments[currentIndex].name}.`);
+    }
+  }
 
-    startButton.disabled = true;
-    pauseButton.disabled = true;
-    nextButton.disabled = true;
+  function finishWorkout() {
+    clearIntervalTimer();
+    running = false;
+    finished = true;
+    remaining = 0;
+    endTimestamp = null;
+    segmentStartedAt = null;
 
-    phaseLabel.textContent = "SÉANCE TERMINÉE";
-    clock.textContent = "00:00";
-    subtitle.textContent = "Bravo, séance terminée.";
-    statusLabel.textContent = "TERMINÉE";
-    stepLabel.textContent = `${segments.length} / ${segments.length}`;
-    elapsedLabel.textContent = formatTime(getTotalDuration());
-    totalLabel.textContent = formatTime(getTotalDuration());
-    progressBar.style.width = "100%";
+    completedSeconds = totalDuration();
 
-    planList.querySelectorAll(".plan-row").forEach(row => {
-      row.classList.add("is-done");
-      row.classList.remove("is-current");
-    });
+    setText(elements.clock, "00:00");
+    setText(elements.phase, "Séance terminée");
+    setText(elements.subtitle, "Bravo ! Ta séance est terminée.");
+    setText(elements.status, "TERMINÉE");
+    setText(elements.step, `${segments.length} / ${segments.length}`);
 
-    timerNotice.textContent = "Séance terminée : ajout à ton historique.";
-    saveCompletedWorkout();
-  };
+    if (elements.progress) {
+      elements.progress.style.width = "100%";
+      elements.progress.setAttribute("aria-valuenow", "100");
+    }
 
-  const resetTimer = () => {
-    stopInterval();
+    saveWorkout();
+    renderPlan();
+    updateDisplay();
+    setButtonStates();
+    showNotice("Séance terminée ! Pense à récupérer et à t’hydrater.", "success");
+  }
 
-    isRunning = false;
-    isFinished = false;
+  function resetTimer() {
+    clearIntervalTimer();
+
+    running = false;
+    finished = false;
+    endTimestamp = null;
+    segmentStartedAt = null;
+    completedSeconds = 0;
+    sessionStartedAt = null;
     currentIndex = 0;
-    elapsedInSegment = 0;
-    segmentStartedAt = 0;
-    sessionStartedAt = 0;
-
-    startButton.disabled = !segments.length;
-    pauseButton.disabled = true;
-    nextButton.disabled = !segments.length;
+    sessionSaved = false;
 
     if (!segments.length) {
-      clock.textContent = "00:00";
-      phaseLabel.textContent = "PRÊT À DÉMARRER";
-      subtitle.textContent = "Prépare une séance pour commencer.";
-      statusLabel.textContent = "EN ATTENTE";
-      stepLabel.textContent = "— / —";
-      elapsedLabel.textContent = "00:00";
-      totalLabel.textContent = "—";
-      progressBar.style.width = "0%";
-      timerNotice.textContent =
-        "Choisis une séance et clique sur « Préparer la séance ».";
+      setText(elements.clock, "00:00");
+      setText(elements.phase, "Prêt à démarrer");
+      setText(elements.subtitle, "Prépare une séance pour commencer.");
+      setText(elements.status, "EN ATTENTE");
+      setText(elements.step, "—");
+      setButtonStates();
       return;
     }
 
+    remaining = segments[0].duration;
     renderSegment();
-    elapsedLabel.textContent = "00:00";
-    totalLabel.textContent = formatTime(getTotalDuration());
-    progressBar.style.width = "0%";
-    timerNotice.textContent = "Séance réinitialisée.";
-  };
+    updateDisplay();
+    showNotice("Séance réinitialisée.");
+  }
 
-  const prepareWorkout = () => {
-    configError.textContent = "";
-    historyNotice.textContent = "";
+  function prepareWorkout() {
+    clearIntervalTimer();
+    showError("");
+    showNotice("");
+
+    const type = getSelectedWorkout();
+
+    if (!type) {
+      showError("Sélectionne d’abord un type de séance.");
+      return;
+    }
 
     try {
-      if (["fractionne", "pyramide"].includes(selectedWorkout)) {
-        if (readPace() === null) {
-          throw new Error("Saisis une allure valide au format 5:00 min/km.");
-        }
+      const newSegments = buildWorkout(type);
+
+      if (!newSegments.length) {
+        throw new Error("Cette séance ne contient aucune étape.");
       }
 
-      activeWorkout = buildWorkout(selectedWorkout);
-      segments = activeWorkout.segments;
+      segments = newSegments;
+      workoutType = type;
+      currentIndex = 0;
+      remaining = segments[0].duration;
+      completedSeconds = 0;
+      running = false;
+      finished = false;
+      endTimestamp = null;
+      segmentStartedAt = null;
+      sessionStartedAt = null;
+      sessionSaved = false;
 
-      if (!segments.length) {
-        throw new Error("Aucune étape n'a pu être créée.");
+      if (elements.description) {
+        elements.description.textContent =
+          `${workoutNames[type]} · ${segments.length} étapes · ` +
+          `${formatDuration(totalDuration())}`;
       }
 
-      renderPlan();
-      resetTimer();
+      renderSegment();
+      updateDisplay();
+      showNotice("Séance prête. Appuie sur Démarrer quand tu es prêt.", "success");
 
-      startButton.disabled = false;
-      nextButton.disabled = false;
-      timerNotice.textContent = "Séance prête. Appuie sur « Démarrer ».";
-
-      $("#running-timer").scrollIntoView({
+      $("#timer-start")?.scrollIntoView({
         behavior: reducedMotion ? "auto" : "smooth",
-        block: "start"
+        block: "nearest"
       });
     } catch (error) {
-      configError.textContent = error.message ||
-        "Impossible de préparer cette séance.";
+      showError(error instanceof Error
+        ? error.message
+        : "Impossible de préparer cette séance.");
     }
-  };
+  }
 
-  /* ---------- Événements de l'interface ---------- */
+  /* =========================================================
+     HISTORIQUE DES SÉANCES
+  ========================================================= */
 
-  const updateSelectedWorkout = type => {
-    selectedWorkout = type;
+  function readHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) return [];
 
-    workoutCards.forEach(card => {
-      const selected = card.dataset.workout === type;
-      card.classList.toggle("is-selected", selected);
-      card.setAttribute("aria-pressed", String(selected));
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed.filter((item) =>
+        item &&
+        typeof item === "object" &&
+        typeof item.name === "string" &&
+        Number.isFinite(Number(item.duration)) &&
+        Number(item.duration) >= 0
+      ).slice(0, MAX_HISTORY);
+    } catch {
+      return [];
+    }
+  }
+
+  function writeHistory(history) {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function saveWorkout() {
+    if (sessionSaved || !segments.length) return;
+
+    const history = readHistory();
+    history.unshift({
+      id: `${now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name: workoutNames[workoutType] || "Séance",
+      duration: totalDuration(),
+      completedAt: new Date().toISOString(),
+      steps: segments.length
     });
 
-    lab.classList.toggle("is-custom", type === "custom");
+    const success = writeHistory(history.slice(0, MAX_HISTORY));
+    sessionSaved = true;
+    renderHistory();
 
-    workoutDescription.textContent =
-      workoutInfo[type]?.description || "";
+    if (!success) {
+      showNotice(
+        "Séance terminée, mais le navigateur n’a pas pu sauvegarder l’historique.",
+        "warning"
+      );
+    }
+  }
 
-    configError.textContent = "";
-  };
-
-  workoutCards.forEach(card => {
-    card.addEventListener("click", () => {
-      updateSelectedWorkout(card.dataset.workout);
-    });
-  });
-
-  prepareButton.addEventListener("click", prepareWorkout);
-  startButton.addEventListener("click", startTimer);
-  pauseButton.addEventListener("click", pauseTimer);
-  nextButton.addEventListener("click", advanceSegment);
-  resetButton.addEventListener("click", resetTimer);
-
-  historyClear.addEventListener("click", () => {
+  function renderHistory() {
     const history = readHistory();
 
-    if (!history.length) {
-      historyNotice.textContent = "L'historique est déjà vide.";
+    if (elements.historyList) {
+      elements.historyList.replaceChildren();
+
+      if (history.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "history-empty";
+        empty.textContent = "Aucune séance enregistrée pour le moment.";
+        elements.historyList.append(empty);
+      } else {
+        history.forEach((session) => {
+          const item = document.createElement("article");
+          item.className = "history-item";
+
+          const info = document.createElement("div");
+          info.className = "history-item-info";
+
+          const title = document.createElement("strong");
+          title.textContent = session.name;
+
+          const date = document.createElement("span");
+          const parsedDate = new Date(session.completedAt);
+          date.textContent = Number.isNaN(parsedDate.getTime())
+            ? "Date inconnue"
+            : parsedDate.toLocaleDateString("fr-FR", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+              });
+
+          info.append(title, date);
+
+          const duration = document.createElement("span");
+          duration.className = "history-item-duration";
+          duration.textContent = formatDuration(Number(session.duration));
+
+          item.append(info, duration);
+          elements.historyList.append(item);
+        });
+      }
+    }
+
+    setText(elements.historyCount, String(history.length));
+
+    const total = history.reduce(
+      (sum, session) => sum + Number(session.duration),
+      0
+    );
+
+    setText(elements.historyDuration, formatDuration(total));
+  }
+
+  function clearHistory() {
+    const history = readHistory();
+
+    if (history.length === 0) {
+      setText(elements.historyNotice, "L’historique est déjà vide.");
       return;
     }
 
-    if (!window.confirm("Effacer tout l'historique de tes séances ?")) {
-      return;
-    }
+    const confirmed = window.confirm(
+      "Veux-tu vraiment supprimer tout l’historique de tes séances ?"
+    );
 
-    if (saveHistory([])) {
+    if (!confirmed) return;
+
+    try {
+      localStorage.removeItem(HISTORY_KEY);
       renderHistory();
-      historyNotice.textContent = "Historique effacé.";
+      setText(elements.historyNotice, "Historique supprimé.");
+    } catch {
+      setText(
+        elements.historyNotice,
+        "Impossible de supprimer l’historique dans ce navigateur."
+      );
     }
+  }
+
+  /* =========================================================
+     ÉVÉNEMENTS
+  ========================================================= */
+
+  lab.querySelectorAll("[data-workout]").forEach((card) => {
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-pressed", "false");
+
+    function selectWorkout() {
+      lab.querySelectorAll("[data-workout]").forEach((other) => {
+        const selected = other === card;
+        other.classList.toggle("is-selected", selected);
+        other.setAttribute("aria-pressed", String(selected));
+      });
+
+      showError("");
+    }
+
+    card.addEventListener("click", selectWorkout);
+
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectWorkout();
+      }
+    });
   });
 
-  /* ---------- Initialisation ---------- */
+  elements.prepare?.addEventListener("click", prepareWorkout);
+  elements.start?.addEventListener("click", startTimer);
+  elements.pause?.addEventListener("click", pauseTimer);
+  elements.next?.addEventListener("click", () => advanceSegment(false));
+  elements.reset?.addEventListener("click", resetTimer);
+  elements.historyClear?.addEventListener("click", clearHistory);
 
-  updateSelectedWorkout("vma");
+  // Initialisation
   renderHistory();
   resetTimer();
 })();
