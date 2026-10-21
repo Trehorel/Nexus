@@ -1576,3 +1576,10 @@ button:disabled {
     transform: none;
   }
 }
+
+@media (max-width:620px){
+  .logo{font-size:1.25rem}
+  nav{gap:.7rem}
+  nav a:not(.btn){font-size:.9rem}
+  .btn.small{padding:.5rem .8rem;font-size:.9rem}
+}
